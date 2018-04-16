@@ -23,23 +23,7 @@ df_all['cv_id'] = cv_id['cv_id_10']
 # for videofea in videofeatures:
 #     df_all[videofea].fillna(np.mean(df_all[videofea].values),inplace=True)
 # df_all.to_csv('../input/filled-labels_features.csv',index=False)
-all_text = df_all['damuku']
-if USE_COMMENT:
-    word_vectorizer = TfidfVectorizer(
-        sublinear_tf=True,
-        # strip_accents='unicode',
-        analyzer='word',
-        ngram_range=(1, 5),
-        max_features=15000)
-    word_vectorizer.fit(all_text)
-
-    char_vectorizer = TfidfVectorizer(
-        sublinear_tf=True,
-        # strip_accents='unicode',
-        analyzer='char',
-        ngram_range=(1, 6),
-        max_features=20000)
-    char_vectorizer.fit(all_text)
+all_text = df_all['danmaku']
 
 # methods = ['LinerRegression', 'SVR', 'KernelRidge', 'Lasso']
 methods = ['GDBT']
@@ -55,11 +39,12 @@ methods = ['GDBT']
 # features_string = 'video-audio'
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.svm import SVR
+from sklearn.svm import SVR,LinearSVR
 from sklearn.model_selection import GridSearchCV
 from sklearn.kernel_ridge import KernelRidge
 from sklearn import linear_model
 import lightgbm as lgb
+
 
 for feature in videofeatures + audiofeatures:
     scaler = MinMaxScaler()
@@ -67,18 +52,18 @@ for feature in videofeatures + audiofeatures:
         df_all[feature].values.reshape(-1, 1))
 
 # print(df_all.head())
-test_id = 8
-
-train_data = df_all[df_all['cv_id'] != test_id]  # train data
-valid_data = df_all[df_all['cv_id'] == test_id]  # test data
 
 for classifer in methods:
     for features, features_string in [(videofeatures, 'video'), (audiofeatures, 'audio'), (videofeatures + audiofeatures, 'videoAndAudio')]:
-        
+        test_id = 8
         print('classifer: %s, features: %s, testid: %d' %
               (classifer, features_string, test_id))
 
         scores = []
+
+        train_data = df_all[df_all['cv_id'] != test_id]  # train data
+        valid_data = df_all[df_all['cv_id'] == test_id]  # test data
+
         sub = pd.DataFrame.from_dict({'id': valid_data['id']})
 
         for class_name in labels:

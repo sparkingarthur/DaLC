@@ -20,7 +20,7 @@ USE_COMMENT = False
 audiofeatures = ['audio_harmonic','audio_engergy','audio_centroid','audio_contrast_low','audio_contrast_middle','audio_contrast_high','audio_zero_crossing_rate','audio_slience_rate']
 videofeatures = ['optical_flow_mean','optical_flow_std','video_warmc','video_heavyl','video_activep','video_hards','video_darkProportion','video_lightPropertion','video_saturation','video_color_energy','video_color_std']
 labels = ['arousal','excitement','pleasure','contentment','sleepiness','depression','misery','distress']
-comment_fea = ['danmuku_len']
+comment_fea = ['danmaku_len']
 df_all = pd.read_csv('../input/filled-labels_features.csv')
 df_all = df_all.merge(pd.read_csv('../input/comment_features.csv'),on=['id'])
 cv_id = pd.read_csv('../input/cv_id_10.txt')
@@ -29,7 +29,7 @@ df_all['cv_id']=cv_id['cv_id_10']
 # for videofea in videofeatures:
 #     df_all[videofea].fillna(np.mean(df_all[videofea].values),inplace=True)
 # df_all.to_csv('../input/filled-labels_features.csv',index=False)
-all_text = df_all['danmuku']
+all_text = df_all['danmaku']
 
 features = videofeatures + audiofeatures
 #features = audiofeatures #+ comment_fea

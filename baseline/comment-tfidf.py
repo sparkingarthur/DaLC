@@ -2,6 +2,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR,LinearSVR
+from sklearn.model_selection import GridSearchCV
+from sklearn.kernel_ridge import KernelRidge
+from sklearn import linear_model
+import lightgbm as lgb
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error,mean_absolute_error
 from scipy.sparse import hstack
@@ -15,9 +20,9 @@ random.seed(2018)
 audiofeatures = ['audio_harmonic','audio_engergy','audio_centroid','audio_contrast_low','audio_contrast_middle','audio_contrast_high','audio_zero_crossing_rate','audio_slience_rate']
 videofeatures = ['optical_flow_mean','optical_flow_std','video_warmc','video_heavyl','video_activep','video_hards','video_darkProportion','video_lightPropertion','video_saturation','video_color_energy','video_color_std']
 labels = ['arousal','excitement','pleasure','contentment','sleepiness','depression','misery','distress']
-comment_fea = ['danmuku_len']
+comment_fea = ['danmaku_len','danmaku_den']
 df_all = pd.read_csv('../input/filled-labels_features.csv')
-df_all = df_all.merge(pd.read_csv('../input/comment_features.csv'),on=['id'])
+df_all = df_all.merge(pd.read_csv('../input/comment_length_den.csv'),on=['id'])
 cv_id = pd.read_csv('../input/cv_id_10.txt')
 df_all['cv_id']=cv_id['cv_id_10']
 
@@ -64,9 +69,9 @@ def text_to_wordlist(query):
     return result
 
 
-df_all['danmuku_words'] = df_all['danmuku'].map(lambda x:text_to_wordlist(x))
+df_all['danmaku_words'] = df_all['danmaku'].map(lambda x:text_to_wordlist(x))
 
-all_text = df_all['danmuku_words']
+all_text = df_all['danmaku_words']
 word_vectorizer = TfidfVectorizer(
     sublinear_tf=True,
     #strip_accents='unicode',
@@ -91,8 +96,8 @@ test_id = 8
 train_data = df_all[df_all['cv_id'] != test_id] # train data
 valid_data = df_all[df_all['cv_id'] == test_id] # test data
 
-train_text = train_data['danmuku_words']
-test_text = valid_data['danmuku_words']
+train_text = train_data['danmaku_words']
+test_text = valid_data['danmaku_words']
 
 train_char_features = char_vectorizer.transform(train_text)
 train_word_features = word_vectorizer.transform(train_text)
